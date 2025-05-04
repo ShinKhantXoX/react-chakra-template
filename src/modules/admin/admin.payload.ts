@@ -136,7 +136,7 @@ export const columns: readonly Admin_Column[] = [
   {
     id: "action",
     label: "Action",
-    minWidth: 50,
+    minWidth: 20,
     maxWidth: 50,
     numeric: false,
     disablePadding: false,

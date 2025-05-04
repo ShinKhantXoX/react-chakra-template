@@ -25,6 +25,8 @@ import { setPaginate } from "../admin.slice";
 import { adminService } from "../admin.service";
 import { CiSearch } from "react-icons/ci";
 import { paginateOptions } from "@/constants/config";
+import { MdOutlineEditNote, MdOutlineDelete } from "react-icons/md";
+import EditableColumn from "@/components/EditableColumn";
 
 const AdminList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -150,11 +152,29 @@ const AdminList = () => {
             <Table.Row>
               {columns?.map((column, index) => {
                 return (
-                  <Table.ColumnHeader key={index} userSelect={"none"}>
+                  <Table.ColumnHeader
+                    width={column.maxWidth}
+                    key={index}
+                    userSelect={"none"}
+                  >
                     <Box display={"flex"} justifyContent={"space-between"}>
                       {column.label}
                       {column.sortable && (
-                        <Icon size={"md"} cursor={"pointer"}>
+                        <Icon
+                          onClick={() => {
+                            console.log("sort click");
+                            dispatch(
+                              setPaginate({
+                                ...pagingParams,
+                                order: column.id,
+                                sort:
+                                  pagingParams.sort === "asc" ? "desc" : "asc",
+                              })
+                            );
+                          }}
+                          size={"md"}
+                          cursor={"pointer"}
+                        >
                           <GoSortAsc />
                         </Icon>
                       )}
@@ -168,7 +188,13 @@ const AdminList = () => {
             {!loading &&
               data?.data?.data?.map((item) => (
                 <Table.Row key={item.id}>
-                  <Table.Cell>{item.username}</Table.Cell>
+                  <Table.Cell>
+                    <EditableColumn
+                      column={"username"}
+                      value={item.username}
+                      id={item.id}
+                    />
+                  </Table.Cell>
                   <Table.Cell>{item.phone}</Table.Cell>
                   <Table.Cell>{item.email}</Table.Cell>
                   <Table.Cell>
@@ -177,7 +203,22 @@ const AdminList = () => {
                       {item.status}
                     </Status.Root>
                   </Table.Cell>
-                  <Table.Cell>{item.action}</Table.Cell>
+                  <Table.Cell>
+                    <Box
+                      width={"100%"}
+                      display={"flex"}
+                      gap={4}
+                      justifyContent={"start"}
+                      alignItems={"center"}
+                    >
+                      <Icon size={"md"} cursor={"pointer"} color={"blue.500"}>
+                        <MdOutlineEditNote />
+                      </Icon>
+                      <Icon size={"md"} cursor={"pointer"} color={"red.500"}>
+                        <MdOutlineDelete />
+                      </Icon>
+                    </Box>
+                  </Table.Cell>
                 </Table.Row>
               ))}
           </Table.Body>

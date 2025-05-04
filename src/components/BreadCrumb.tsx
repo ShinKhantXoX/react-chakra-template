@@ -17,26 +17,31 @@ export const Breadcrumb = () => {
   return (
     <Box display={"flex"} alignItems={"center"} gap={"2"} py={"3"}>
       <For each={breadcrumbs}>
-        {(bread, index) => (
-          <Bread.Root key={index}>
-            <Bread.List>
-              <Bread.Item>
-                <Bread.Link
-                  cursor={"pointer"}
-                  onClick={() => navigate(bread.url)}
-                >
-                  {bread.url !== location.pathname && bread.label}
-                </Bread.Link>
-              </Bread.Item>
-              {bread.url !== location.pathname && <Bread.Separator />}
-              <Bread.Item>
-                <Bread.CurrentLink cursor={"disabled"}>
-                  {bread.url === location.pathname && bread.label}
-                </Bread.CurrentLink>
-              </Bread.Item>
-            </Bread.List>
-          </Bread.Root>
-        )}
+        {(bread, index) => {
+          return (
+            <Bread.Root key={index}>
+              <Bread.List>
+                {bread.url !== location.pathname ? (
+                  <Bread.Item>
+                    <Bread.Link
+                      cursor={"pointer"}
+                      onClick={() => navigate(bread.url)}
+                    >
+                      {bread.label}
+                    </Bread.Link>
+                  </Bread.Item>
+                ) : (
+                  <Bread.Item>
+                    <Bread.CurrentLink cursor={"disabled"}>
+                      {bread.label}
+                    </Bread.CurrentLink>
+                  </Bread.Item>
+                )}
+                {breadcrumbs.length - 1 !== index && <Bread.Separator />}
+              </Bread.List>
+            </Bread.Root>
+          );
+        }}
       </For>
     </Box>
   );

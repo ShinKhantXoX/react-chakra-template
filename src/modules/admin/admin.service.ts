@@ -60,6 +60,24 @@ export const adminService = {
     }
     return response.data;
   },
+  updateColumn: async (
+    dispatch: Dispatch,
+    id: number,
+    payload: any,
+    column?: string
+  ) => {
+    const response: any = await putRequest(
+      `${endpoints.admin}/${id}`,
+      payload,
+      dispatch
+    );
+    await httpServiceHandler(dispatch, response.data);
+
+    if (response.status === 200) {
+      dispatch(update(response.data));
+    }
+    return response;
+  },
 
   show: async (dispatch: Dispatch, id: number) => {
     const response: any = await getRequest(
