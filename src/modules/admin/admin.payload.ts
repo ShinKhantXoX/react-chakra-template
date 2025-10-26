@@ -34,15 +34,14 @@ export type AdminFormInputs = z.infer<typeof adminSchema>;
  */
 export interface ADMIN {
   id: number;
-  username: string;
-  phone: string;
+  first_name: string;
+  last_name: string;
   email: string;
   role: string;
   emailVerifiedAt: Date;
-  phoneVerifiedAt: Date;
   password: string;
   gender: number;
-  address: string;
+  dob: string;
   status: number;
   action: any;
   // Add other country properties as necessary
@@ -81,7 +80,7 @@ export interface ADMIN_PAYLOAD {
   /** Parameters for paging and sorting */
   pagingParams: {
     page: number;
-    per_page: number;
+    rows: number;
     columns: string;
     search: string;
     order: string;
@@ -98,8 +97,8 @@ export interface ADMIN_PAYLOAD {
  */
 export const columns: readonly Admin_Column[] = [
   {
-    id: "username",
-    label: "User Name",
+    id: "first_name",
+    label: "First Name",
     minWidth: 170,
     maxWidth: 300,
     numeric: false,
@@ -107,8 +106,17 @@ export const columns: readonly Admin_Column[] = [
     sortable: true,
   },
   {
-    id: "phone",
-    label: "Phone",
+    id: "last_name",
+    label: "Last Name",
+    minWidth: 170,
+    maxWidth: 300,
+    numeric: false,
+    disablePadding: false,
+    sortable: true,
+  },
+  {
+    id: "dob",
+    label: "Date of birth",
     minWidth: 200,
     maxWidth: 250,
     numeric: false,
@@ -149,8 +157,8 @@ export const columns: readonly Admin_Column[] = [
 export const adminPayload: ADMIN_PAYLOAD = {
   pagingParams: {
     page: 1,
-    per_page: paginateOptions.rows,
-    columns: "id,username,phone,email,status",
+    rows: paginateOptions.rows,
+    columns: "id,first_name,last_name,email,status",
     search: "",
     order: "id",
     sort: "asc",

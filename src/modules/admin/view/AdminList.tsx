@@ -95,7 +95,7 @@ const AdminList = () => {
       setPaginate({
         ...pagingParams,
         // page: 1,
-        per_page: rowsPerPage,
+        rows: rowsPerPage,
       })
     );
     // setRowsPerPage(+event.target.value);
@@ -154,7 +154,7 @@ const AdminList = () => {
                 return (
                   <Table.ColumnHeader
                     width={column.maxWidth}
-                    key={index}
+                    key={column.id || `col-${index}`}
                     userSelect={"none"}
                   >
                     <Box display={"flex"} justifyContent={"space-between"}>
@@ -186,16 +186,23 @@ const AdminList = () => {
           </Table.Header>
           <Table.Body>
             {!loading &&
-              data?.data?.data?.map((item) => (
-                <Table.Row key={item.id}>
+              data?.data?.data?.map((item, index) => (
+                <Table.Row key={`row-${item.id}-${index}`}>
                   <Table.Cell>
                     <EditableColumn
-                      column={"username"}
-                      value={item.username}
+                      column={"first_name"}
+                      value={item.first_name}
                       id={item.id}
                     />
                   </Table.Cell>
-                  <Table.Cell>{item.phone}</Table.Cell>
+                  <Table.Cell>
+                    <EditableColumn
+                      column={"last_name"}
+                      value={item.last_name}
+                      id={item.id}
+                    />
+                  </Table.Cell>
+                  <Table.Cell>{item.dob}</Table.Cell>
                   <Table.Cell>{item.email}</Table.Cell>
                   <Table.Cell>
                     <Status.Root colorPalette="green">
@@ -258,6 +265,7 @@ const AdminList = () => {
               <Pagination.Items
                 render={(page) => (
                   <IconButton
+                    key={`page-${page.value}`} // Add unique key
                     variant={{ base: "ghost", _selected: "outline" }}
                     onClick={() => handleChangePage(page.value)}
                   >

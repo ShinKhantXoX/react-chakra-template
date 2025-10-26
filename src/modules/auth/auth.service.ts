@@ -11,14 +11,14 @@ import axios from "axios";
 export const authService = {
   store: async (payload: any, dispatch: Dispatch) => {
     const response: any = await postRequest(
-      endpoints.authLogin,
+      endpoints.adminAuthLogin,
       payload,
       dispatch
     );
     await httpServiceHandler(dispatch, response);
 
     if (response.status === 200 && response.statusText === "OK") {
-      setData(keys.API_TOKEN, response?.data?.accessToken);
+      setData(keys.API_TOKEN, response?.data?.access_token);
       setData(keys.REFRESH_TOKEN, response?.data?.refreshToken);
       setData(keys.USER, response.data?.user);
     }
