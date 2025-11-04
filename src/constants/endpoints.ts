@@ -9,6 +9,7 @@ export const endpoints = {
   adminAuthLogin: "admin/auth/login",
   authRefreshToken: "Auth/refresh-token",
   admin: "admin",
+  adminCreate: "admin/create",
   customer: "Customer",
   promotion: "Promotion",
   review: "Review",

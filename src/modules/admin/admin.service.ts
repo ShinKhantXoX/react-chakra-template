@@ -1,95 +1,108 @@
-import { Dispatch } from "redux";
-import { endpoints } from "../../constants/endpoints";
-import { getRequest, postRequest, putRequest } from "../../helpers/api";
-import { httpServiceHandler } from "../../helpers/handler";
-import { AdminFormInputs } from "./admin.payload";
-import { index, show, update } from "./admin.slice";
+import { useDispatch } from "react-redux";
+import { useCallback } from "react";
+import { endpoints } from "@/constants/endpoints";
+import { getRequest, postRequest, putRequest } from "@/helpers/api";
+import { httpServiceHandler } from "@/helpers/handler";
+import { AdminFormInputs } from "@/modules/admin/admin.payload";
+import { index, show, update } from "@/modules/admin/admin.slice";
 
-export const adminService = {
-  store: async (payload: any, dispatch: Dispatch) => {
-    const response: any = await postRequest(endpoints.admin, payload, dispatch);
-    await httpServiceHandler(dispatch, response);
-    console.log(response);
+export const useAdminService = () => {
+  const dispatch = useDispatch();
 
-    // if (response.data.statusCode === 201) {
-    //   //'info' | 'success' | 'warning' | 'error'
-    //   notifications.show("Admin is created successfully", {
-    //     severity: "success",
-    //     autoHideDuration: 3000,
-    //   });
-    // }
-    return response.data;
-  },
+  const store = useCallback(
+    async (payload: any) => {
+      const response: any = await postRequest(
+        endpoints.adminCreate,
+        payload,
+        dispatch
+      );
+      await httpServiceHandler(dispatch, response);
+      console.log(response);
 
-  index: async (dispatch: Dispatch, params: any) => {
-    const response: any = await getRequest(endpoints.admin, params, dispatch);
-    await httpServiceHandler(dispatch, response.data);
-    console.log(response.data);
-
-    if (response.status === 200) {
-      //'info' | 'success' | 'warning' | 'error'
-      //   notifications.show("Admin list is successfully retrieved!", {
-      //     severity: "info",
+      // if (response.data.statusCode === 201) {
+      //   notifications.show("Admin is created successfully", {
+      //     severity: "success",
       //     autoHideDuration: 3000,
       //   });
-      dispatch(index(response.data));
-    }
-    return response.data;
-  },
+      // }
+      return response.data;
+    },
+    [dispatch]
+  );
 
-  update: async (
-    dispatch: Dispatch,
-    id: number,
-    payload: AdminFormInputs,
-    notifications?: any
-  ) => {
-    const response: any = await putRequest(
-      `${endpoints.admin}/${id}`,
-      payload,
-      dispatch
-    );
-    await httpServiceHandler(dispatch, response.data);
+  const getIndex = useCallback(
+    async (params: any) => {
+      const response: any = await getRequest(endpoints.admin, params, dispatch);
+      await httpServiceHandler(dispatch, response.data);
+      console.log(response.data);
 
-    if (response.data.statusCode === 200) {
-      //'info' | 'success' | 'warning' | 'error'
-      notifications?.show("Admin is updated successfully", {
-        severity: "success",
-        autoHideDuration: 3000,
-      });
-      dispatch(update(response.data));
-    }
-    return response.data;
-  },
-  updateColumn: async (
-    dispatch: Dispatch,
-    id: number,
-    payload: any,
-    column?: string
-  ) => {
-    const response: any = await putRequest(
-      `${endpoints.admin}/${id}`,
-      payload,
-      dispatch
-    );
-    await httpServiceHandler(dispatch, response.data);
+      if (response.status === 200) {
+        dispatch(index(response.data));
+      }
+      return response.data;
+    },
+    [dispatch]
+  );
 
-    if (response.status === 200) {
-      dispatch(update(response.data));
-    }
-    return response;
-  },
+  const updateAdmin = useCallback(
+    async (id: number, payload: AdminFormInputs, notifications?: any) => {
+      const response: any = await putRequest(
+        `${endpoints.admin}/${id}`,
+        payload,
+        dispatch
+      );
+      await httpServiceHandler(dispatch, response.data);
 
-  show: async (dispatch: Dispatch, id: number) => {
-    const response: any = await getRequest(
-      `${endpoints.admin}/${id}`,
-      null,
-      dispatch
-    );
-    await httpServiceHandler(dispatch, response.data.payload);
-    if (response.data.statusCode === 200) {
-      dispatch(show(response.data.payload));
-    }
+      if (response.data.statusCode === 200) {
+        notifications?.show("Admin is updated successfully", {
+          severity: "success",
+          autoHideDuration: 3000,
+        });
+        dispatch(update(response.data));
+      }
+      return response.data;
+    },
+    [dispatch]
+  );
 
-    return response.data;
-  },
+  const updateColumn = useCallback(
+    async (id: number, payload: any, column?: string) => {
+      const response: any = await postRequest(
+        `${endpoints.admin}/${id}`,
+        payload,
+        dispatch
+      );
+      await httpServiceHandler(dispatch, response.data);
+
+      if (response.status === 200) {
+        dispatch(update(response.data));
+      }
+      return response;
+    },
+    [dispatch]
+  );
+
+  const getShow = useCallback(
+    async (id: number) => {
+      const response: any = await getRequest(
+        `${endpoints.admin}/${id}`,
+        null,
+        dispatch
+      );
+      await httpServiceHandler(dispatch, response.data.payload);
+      if (response.data.statusCode === 200) {
+        dispatch(show(response.data.payload));
+      }
+      return response.data;
+    },
+    [dispatch]
+  );
+
+  return {
+    store,
+    index: getIndex,
+    update: updateAdmin,
+    updateColumn,
+    show: getShow,
+  };
 };

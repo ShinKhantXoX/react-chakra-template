@@ -22,11 +22,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppDispatch, AppRootState } from "@/stores";
 import { useDispatch, useSelector } from "react-redux";
 import { setPaginate } from "../admin.slice";
-import { adminService } from "../admin.service";
 import { CiSearch } from "react-icons/ci";
 import { paginateOptions } from "@/constants/config";
 import { MdOutlineEditNote, MdOutlineDelete } from "react-icons/md";
 import EditableColumn from "@/components/EditableColumn";
+import { useAdminService } from "../admin.service";
 
 const AdminList = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,6 +34,8 @@ const AdminList = () => {
     (state: AppRootState) => state.admin
   );
   const [loading, setLoading] = useState(false);
+  const { index, update, show } = useAdminService();
+  const adminService = useAdminService();
 
   const [searchValue, setSearchValue] = useState(pagingParams.search || "");
   const timerRef = useRef<number | null>(null);
@@ -104,7 +106,7 @@ const AdminList = () => {
 
   const loadingData = useCallback(async () => {
     setLoading(true);
-    await adminService.index(dispatch, pagingParams);
+    await index(pagingParams);
     setLoading(false);
   }, [dispatch, pagingParams]);
 
@@ -190,16 +192,18 @@ const AdminList = () => {
                 <Table.Row key={`row-${item.id}-${index}`}>
                   <Table.Cell>
                     <EditableColumn
-                      column={"first_name"}
+                      column={"First Name"}
                       value={item.first_name}
                       id={item.id}
+                      service={adminService}
                     />
                   </Table.Cell>
                   <Table.Cell>
                     <EditableColumn
-                      column={"last_name"}
+                      column={"Last Name"}
                       value={item.last_name}
                       id={item.id}
+                      service={adminService}
                     />
                   </Table.Cell>
                   <Table.Cell>{item.dob}</Table.Cell>

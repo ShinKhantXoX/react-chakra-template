@@ -7,13 +7,16 @@ import { stores } from "./stores";
 import "./index.css";
 import { router } from "./router.tsx";
 import { Toaster } from "./components/ui/toaster.tsx";
+import { ServiceProvider } from "./shares/ServiceProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
       <Provider store={stores}>
         <Toaster />
-        <RouterProvider router={router} />
+        <ServiceProvider>
+          <RouterProvider router={router} />
+        </ServiceProvider>
       </Provider>
     </ThemeProvider>
   </StrictMode>

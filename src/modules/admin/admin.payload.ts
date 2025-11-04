@@ -2,14 +2,16 @@ import { paginateOptions } from "@/constants/config";
 import { z } from "zod";
 
 export const adminSchema = z.object({
-  id: z.number().min(0, { message: "id" }).default(0),
-  Name: z
+  first_name: z
     .string()
-    .min(2, { message: "Name must be at least 2 characters long" }),
-  // zipCode: z.string().min(2, { message: "Zip Code is required" }),
-  Email: z.string().email(),
-  Phone: z.string().min(8, { message: "phone number is at least 8 digit" }),
-  Password: z
+    .min(2, { message: "First Name must be at least 2 characters long" }),
+  last_name: z
+    .string()
+    .min(2, { message: "Last Name must be at least 2 characters long" }),
+  profile: z.any().nullable(),
+  email: z.string().email(),
+  gender: z.string(),
+  password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters long" }) // Minimum length
     .regex(/[A-Z]/, {
@@ -22,7 +24,14 @@ export const adminSchema = z.object({
     .regex(/[^a-zA-Z0-9]/, {
       message: "Password must contain at least one special character",
     }), // Special character
-  status: z.number(),
+  dob: z.preprocess(
+    (val) => (typeof val === "string" ? new Date(val) : val),
+    z.date({ required_error: "Date of Birth is required" })
+  ),
+  about: z.string().optional(),
+  user_type: z.string(),
+
+  status: z.string(),
   // emailVerifiedAt: z.date().nullable(),
   // phoneVerifiedAt: z.date().nullable()
 });
@@ -37,11 +46,13 @@ export interface ADMIN {
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
   emailVerifiedAt: Date;
   password: string;
   gender: number;
   dob: string;
+  about: string;
+  user_type: string;
+  profile: string;
   status: number;
   action: any;
   // Add other country properties as necessary

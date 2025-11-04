@@ -27,7 +27,7 @@ const BrandLayout = () => {
   };
 
   return (
-    <div>
+    <Box bg={"pageBg"}>
       <Card.Root>
         <Card.Body>
           <Box display={"flex"} justifyContent="space-between">
@@ -44,7 +44,7 @@ const BrandLayout = () => {
               <Portal>
                 <Drawer.Backdrop />
                 <Drawer.Positioner>
-                  <Drawer.Content>
+                  <Drawer.Content bg="surfaceBg">
                     <Drawer.Header>
                       <Drawer.Title>Starter Kit</Drawer.Title>
                     </Drawer.Header>
@@ -95,7 +95,7 @@ const BrandLayout = () => {
       </Card.Root>
 
       <Outlet />
-    </div>
+    </Box>
   );
 };
 

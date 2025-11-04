@@ -1,4 +1,3 @@
-import { adminService } from "@/modules/admin/admin.service";
 import { Editable, EditableInput, EditablePreview } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -8,10 +7,12 @@ const EditableColumn = ({
   column,
   value,
   id,
+  service,
 }: {
   column: string;
   value: string;
   id: number;
+  service: any;
 }) => {
   const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState(value);
@@ -22,7 +23,7 @@ const EditableColumn = ({
       if (inputValue === value) return;
       try {
         const payload = { [column]: inputValue };
-        const response = await adminService.updateColumn(dispatch, id, payload);
+        const response = await service.updateColumn(dispatch, id, payload);
         if (response.status === 200) {
           toaster.create({
             title: "Update success",
