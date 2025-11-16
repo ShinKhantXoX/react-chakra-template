@@ -8,7 +8,18 @@ export const adminSchema = z.object({
   last_name: z
     .string()
     .min(2, { message: "Last Name must be at least 2 characters long" }),
-  profile: z.any().nullable(),
+  profile: z
+    .instanceof(File)
+    .refine(
+      (file) => file.size <= 5 * 1024 * 1024,
+      "File size must be less than 5MB"
+    )
+    .refine(
+      (file) => ["image/jpeg", "image/png", "image/jpg"].includes(file.type),
+      "Only JPEG and PNG files are allowed"
+    )
+    .optional()
+    .nullable(),
   email: z.string().email(),
   gender: z.string(),
   password: z
