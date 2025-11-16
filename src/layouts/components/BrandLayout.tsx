@@ -76,7 +76,7 @@ const BrandLayout = () => {
                         </For>
                       </Stack>
                     </Drawer.Body>
-                    <Drawer.Footer>Love is not real</Drawer.Footer>
+                    <Drawer.Footer>Footer</Drawer.Footer>
                     <Drawer.CloseTrigger asChild>
                       <CloseButton size="sm" onClick={() => setIsOpen(false)} />
                     </Drawer.CloseTrigger>

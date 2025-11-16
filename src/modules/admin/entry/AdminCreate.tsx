@@ -23,6 +23,8 @@ import { endpoints } from "@/constants/endpoints";
 import { getRequest } from "@/helpers/api";
 import { useDispatch } from "react-redux";
 import { LuUpload } from "react-icons/lu";
+import { formBuilder } from "@/helpers/formBuilder";
+import { Breadcrumb } from "@/components/BreadCrumb";
 
 // Define the error type based on Zod's actual output
 type FormErrors = {
@@ -54,6 +56,7 @@ function createAdminAction(adminService: ReturnType<typeof useAdminService>) {
   ): Promise<FormState> => {
     // Extract form data and preserve it
     const extractedData = {
+      profile: formData.get("profile") as File,
       first_name: formData.get("first_name") as string,
       last_name: formData.get("last_name") as string,
       email: formData.get("email") as string,
@@ -67,6 +70,7 @@ function createAdminAction(adminService: ReturnType<typeof useAdminService>) {
 
     // Prepare data for validation
     const rawData = {
+      profile: extractedData.profile,
       first_name: extractedData.first_name,
       last_name: extractedData.last_name,
       email: extractedData.email,
@@ -87,9 +91,12 @@ function createAdminAction(adminService: ReturnType<typeof useAdminService>) {
         ...validatedData,
         dob: validatedData.dob.toISOString().split("T")[0], // convert just before API call
       };
+      console.log("Payload", payload);
+      const apiFormData = formBuilder(payload, adminSchema);
+
       // Use the hook-based service
       console.log("Calling adminService.store...");
-      const res = await adminService.store(payload);
+      const res = await adminService.store(apiFormData);
       console.log("Service response:", res);
 
       return {
@@ -197,214 +204,222 @@ const AdminCreate = () => {
   };
 
   return (
-    <Box display={"flex"} justifyContent={"center"} alignItems={"center"} p={6}>
-      <form action={formAction}>
-        <Card.Root width={"1200px"}>
-          <Card.Body>
-            <Fieldset.Root size="lg" maxW="md">
-              <Stack gap="4">
-                <Fieldset.Legend>Admin Create</Fieldset.Legend>
+    <Box>
+      <Breadcrumb />
+      <Box
+        display={"flex"}
+        justifyContent={"center"}
+        alignItems={"center"}
+        p={6}
+      >
+        <form action={formAction}>
+          <Card.Root width={"1200px"}>
+            <Card.Body>
+              <Fieldset.Root size="lg" maxW="md">
+                <Stack gap="4">
+                  <Fieldset.Legend>Admin Create</Fieldset.Legend>
 
-                <FileUpload.Root maxW="xl" alignItems="stretch" maxFiles={10}>
-                  <FileUpload.HiddenInput />
-                  <FileUpload.Dropzone>
-                    <Icon size="md" color="fg.muted">
-                      <LuUpload />
-                    </Icon>
-                    <FileUpload.DropzoneContent>
-                      <Box>Drag and drop files here</Box>
-                      <Box color="fg.muted">.png, .jpg up to 5MB</Box>
-                    </FileUpload.DropzoneContent>
-                  </FileUpload.Dropzone>
-                  <FileUpload.List />
-                </FileUpload.Root>
+                  <FileUpload.Root maxW="xl" alignItems="stretch" maxFiles={10}>
+                    <FileUpload.HiddenInput name={"profile"} />
+                    <FileUpload.Dropzone>
+                      <Icon size="md" color="fg.muted">
+                        <LuUpload />
+                      </Icon>
+                      <FileUpload.DropzoneContent>
+                        <Box>Drag and drop files here</Box>
+                        <Box color="fg.muted">.png, .jpg up to 5MB</Box>
+                      </FileUpload.DropzoneContent>
+                    </FileUpload.Dropzone>
+                    <FileUpload.List />
+                  </FileUpload.Root>
 
-                {/* Display success/error message */}
-                {state.message && (
-                  <Box
-                    p="3"
-                    borderRadius="md"
-                    bg={state.success ? "green.50" : "red.50"}
-                    color={state.success ? "green.800" : "red.800"}
+                  {/* Display success/error message */}
+                  {state.message && (
+                    <Box
+                      p="3"
+                      borderRadius="md"
+                      bg={state.success ? "green.50" : "red.50"}
+                      color={state.success ? "green.800" : "red.800"}
+                    >
+                      <Text fontSize="sm">{state.message}</Text>
+                    </Box>
+                  )}
+
+                  <Fieldset.Content>
+                    {/* First Name */}
+                    <Field.Root invalid={hasError("FirstName")}>
+                      <Field.Label>First Name</Field.Label>
+                      <Input
+                        name="first_name"
+                        defaultValue={getFieldValue("first_name")}
+                      />
+                      {hasError("FirstName") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("FirstName")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* Last Name */}
+                    <Field.Root invalid={hasError("LastName")}>
+                      <Field.Label>Last Name</Field.Label>
+                      <Input
+                        name="last_name"
+                        defaultValue={getFieldValue("last_name")}
+                      />
+                      {hasError("LastName") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("LastName")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* Email */}
+                    <Field.Root invalid={hasError("Email")}>
+                      <Field.Label>Email address</Field.Label>
+                      <Input
+                        name="email"
+                        type="email"
+                        defaultValue={getFieldValue("email")}
+                      />
+                      {hasError("Email") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("Email")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* Gender */}
+                    <Field.Root invalid={hasError("Gender")}>
+                      <Field.Label>Gender</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          name="gender"
+                          defaultValue={getFieldValue("gender")}
+                        >
+                          <option value="">Select Gender</option>
+                          <option value="male">Male</option>
+                          <option value="female">Female</option>
+                          <option value="other">Other</option>
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                      {hasError("Gender") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("Gender")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* Password */}
+                    <Field.Root invalid={hasError("Password")}>
+                      <Field.Label>Password</Field.Label>
+                      <Input
+                        name="password"
+                        type="password"
+                        defaultValue={getFieldValue("password")}
+                      />
+                      {hasError("Password") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("Password")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* Date of Birth */}
+                    <Field.Root invalid={hasError("dob")}>
+                      <Field.Label>Date of Birth</Field.Label>
+                      <Input
+                        name="dob"
+                        type="date"
+                        defaultValue={getFieldValue("dob")}
+                      />
+                      {hasError("dob") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("dob")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* About */}
+                    <Field.Root invalid={hasError("about")}>
+                      <Field.Label>About (Optional)</Field.Label>
+                      <Input
+                        name="about"
+                        as="textarea"
+                        defaultValue={getFieldValue("about")}
+                      />
+                      {hasError("about") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("about")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* User Type */}
+                    <Field.Root invalid={hasError("UserType")}>
+                      <Field.Label>User Type</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          name="user_type"
+                          defaultValue={getFieldValue("user_type")}
+                        >
+                          {adminType.length > 0 &&
+                            adminType.map((typeItem: any) => (
+                              <option key={typeItem} value={typeItem}>
+                                {typeItem}
+                              </option>
+                            ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                      {hasError("UserType") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("UserType")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+
+                    {/* Status */}
+                    <Field.Root invalid={hasError("status")}>
+                      <Field.Label>Status</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          name="status"
+                          defaultValue={getFieldValue("status")}
+                        >
+                          {adminStatus.length > 0 &&
+                            adminStatus.map((statusItem: any) => (
+                              <option key={statusItem} value={statusItem}>
+                                {statusItem}
+                              </option>
+                            ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                      {hasError("status") && (
+                        <Field.ErrorText>
+                          {getErrorMessage("status")}
+                        </Field.ErrorText>
+                      )}
+                    </Field.Root>
+                  </Fieldset.Content>
+
+                  {/* Submit button with pending state from useActionState */}
+                  <Button
+                    type="submit"
+                    alignSelf="flex-start"
+                    loading={pending}
+                    disabled={pending}
                   >
-                    <Text fontSize="sm">{state.message}</Text>
-                  </Box>
-                )}
-
-                <Fieldset.Content>
-                  {/* First Name */}
-                  <Field.Root invalid={hasError("FirstName")}>
-                    <Field.Label>First Name</Field.Label>
-                    <Input
-                      name="first_name"
-                      defaultValue={getFieldValue("first_name")}
-                    />
-                    {hasError("FirstName") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("FirstName")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* Last Name */}
-                  <Field.Root invalid={hasError("LastName")}>
-                    <Field.Label>Last Name</Field.Label>
-                    <Input
-                      name="last_name"
-                      defaultValue={getFieldValue("last_name")}
-                    />
-                    {hasError("LastName") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("LastName")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* Email */}
-                  <Field.Root invalid={hasError("Email")}>
-                    <Field.Label>Email address</Field.Label>
-                    <Input
-                      name="email"
-                      type="email"
-                      defaultValue={getFieldValue("email")}
-                    />
-                    {hasError("Email") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("Email")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* Gender */}
-                  <Field.Root invalid={hasError("Gender")}>
-                    <Field.Label>Gender</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        name="gender"
-                        defaultValue={getFieldValue("gender")}
-                      >
-                        <option value="">Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    {hasError("Gender") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("Gender")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* Password */}
-                  <Field.Root invalid={hasError("Password")}>
-                    <Field.Label>Password</Field.Label>
-                    <Input
-                      name="password"
-                      type="password"
-                      defaultValue={getFieldValue("password")}
-                    />
-                    {hasError("Password") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("Password")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* Date of Birth */}
-                  <Field.Root invalid={hasError("dob")}>
-                    <Field.Label>Date of Birth</Field.Label>
-                    <Input
-                      name="dob"
-                      type="date"
-                      defaultValue={getFieldValue("dob")}
-                    />
-                    {hasError("dob") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("dob")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* About */}
-                  <Field.Root invalid={hasError("about")}>
-                    <Field.Label>About (Optional)</Field.Label>
-                    <Input
-                      name="about"
-                      as="textarea"
-                      defaultValue={getFieldValue("about")}
-                    />
-                    {hasError("about") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("about")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* User Type */}
-                  <Field.Root invalid={hasError("UserType")}>
-                    <Field.Label>User Type</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        name="user_type"
-                        defaultValue={getFieldValue("user_type")}
-                      >
-                        {adminType.length > 0 &&
-                          adminType.map((typeItem: any) => (
-                            <option key={typeItem} value={typeItem}>
-                              {typeItem}
-                            </option>
-                          ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    {hasError("UserType") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("UserType")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-
-                  {/* Status */}
-                  <Field.Root invalid={hasError("status")}>
-                    <Field.Label>Status</Field.Label>
-                    <NativeSelect.Root>
-                      <NativeSelect.Field
-                        name="status"
-                        defaultValue={getFieldValue("status")}
-                      >
-                        {adminStatus.length > 0 &&
-                          adminStatus.map((statusItem: any) => (
-                            <option key={statusItem} value={statusItem}>
-                              {statusItem}
-                            </option>
-                          ))}
-                      </NativeSelect.Field>
-                      <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    {hasError("status") && (
-                      <Field.ErrorText>
-                        {getErrorMessage("status")}
-                      </Field.ErrorText>
-                    )}
-                  </Field.Root>
-                </Fieldset.Content>
-
-                {/* Submit button with pending state from useActionState */}
-                <Button
-                  type="submit"
-                  alignSelf="flex-start"
-                  loading={pending}
-                  disabled={pending}
-                >
-                  {pending ? "Creating..." : "Create Admin"}
-                </Button>
-              </Stack>
-            </Fieldset.Root>
-          </Card.Body>
-        </Card.Root>
-      </form>
+                    {pending ? "Creating..." : "Create Admin"}
+                  </Button>
+                </Stack>
+              </Fieldset.Root>
+            </Card.Body>
+          </Card.Root>
+        </form>
+      </Box>
     </Box>
   );
 };
