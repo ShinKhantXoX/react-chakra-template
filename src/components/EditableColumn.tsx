@@ -1,6 +1,5 @@
 import { Editable, EditableInput, EditablePreview } from "@chakra-ui/react";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
 import { toaster } from "./ui/toaster";
 
 const EditableColumn = ({
@@ -14,7 +13,6 @@ const EditableColumn = ({
   id: number;
   service: any;
 }) => {
-  const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState(value);
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -23,7 +21,7 @@ const EditableColumn = ({
       if (inputValue === value) return;
       try {
         const payload = { [column]: inputValue };
-        const response = await service.updateColumn(dispatch, id, payload);
+        const response = await service.updateColumn({ id, payload, column });
         if (response.status === 200) {
           toaster.create({
             title: "Update success",

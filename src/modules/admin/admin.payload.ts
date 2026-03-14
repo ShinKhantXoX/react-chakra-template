@@ -190,3 +190,11 @@ export const adminPayload: ADMIN_PAYLOAD = {
     end_date: "",
   },
 };
+
+export const adminQueryKeys = {
+  index: "admin-index",
+  show: "admin-show",
+  store: "admin-store",
+  update: "admin-update",
+  delete: "admin-delete"
+};

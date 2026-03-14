@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect } from "react";
 import BrandLayout from "./components/BrandLayout";
 import { useLocation, useNavigate } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { keys } from "@/constants/config";
 import { getData } from "@/helpers/localStorage";
-import { authService } from "@/modules/auth/auth.service";
+import { useAuthService } from "@/modules/auth/auth.service";
 
 const DefaultLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch();
+  const { refreshToken: mutateRefreshToken } = useAuthService();
 
   const token = getData(keys.API_TOKEN);
   // const refToken = getData(keys.REFRESH_TOKEN);
@@ -35,9 +35,9 @@ const DefaultLayout: React.FC = () => {
   const refreshToken = useCallback(() => {
     if (checkRefresh) {
       console.log("Here the refresh logic will be implemented");
-      authService.refreshToken(dispatch);
+      mutateRefreshToken();
     }
-  }, [checkRefresh, dispatch]);
+  }, [checkRefresh, mutateRefreshToken]);
 
   console.log("Check Refresh:", checkRefresh);
 

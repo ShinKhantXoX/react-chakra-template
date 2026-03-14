@@ -6,14 +6,13 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Button, Card, Container, Input, Field } from "@chakra-ui/react";
 import { toaster } from "@/components/ui/toaster";
 import { loginSchema } from "../login.shema";
-import { authService } from "../auth.service";
-import { useDispatch } from "react-redux";
+import { useAuthService } from "../auth.service";
 import { ValidationMessage } from "@/helpers/ValidationMessage";
 
 const Login = () => {
   const [isPending, startTransition] = useTransition();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const { store } = useAuthService();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<
@@ -41,7 +40,7 @@ const Login = () => {
 
     startTransition(async () => {
       const payload = { email: form.email, password: form.password };
-      const loginResult = await authService.store(payload, dispatch);
+      const loginResult = await store(payload);
       // console.log(loginResult);
 
       if (loginResult.error) {
@@ -57,7 +56,7 @@ const Login = () => {
 
       toaster.create({
         title: "Login Successful",
-        description: loginResult.message,
+        description: loginResult.message || "Logged in successfully",
         type: "success",
         duration: 3000,
       });

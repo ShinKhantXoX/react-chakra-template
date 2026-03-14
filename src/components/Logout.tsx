@@ -1,17 +1,16 @@
-import { authService } from "@/modules/auth/auth.service";
+import { useAuthService } from "@/modules/auth/auth.service";
 import { IconButton } from "@chakra-ui/react";
 import { CiLogout } from "react-icons/ci";
-import { useDispatch } from "react-redux";
 
 const Logout = () => {
-  const dispatch = useDispatch();
+  const { logout } = useAuthService();
 
-  const logout = async () => {
-    authService.logout(dispatch);
+  const handleLogout = async () => {
+    logout();
   };
 
   return (
-    <IconButton variant={"outline"} onClick={logout} size={"sm"}>
+    <IconButton variant={"outline"} onClick={handleLogout} size={"sm"}>
       <CiLogout />
     </IconButton>
   );
