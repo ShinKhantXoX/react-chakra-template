@@ -8,16 +8,21 @@ import "./index.css";
 import { router } from "./router.tsx";
 import { Toaster } from "./components/ui/toaster.tsx";
 import { ServiceProvider } from "./shares/ServiceProvider.tsx";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider>
-      <Provider store={stores}>
-        <Toaster />
-        <ServiceProvider>
-          <RouterProvider router={router} />
-        </ServiceProvider>
-      </Provider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <Provider store={stores}>
+          <Toaster />
+          <ServiceProvider>
+            <RouterProvider router={router} />
+          </ServiceProvider>
+        </Provider>
+      </ThemeProvider>
+    </QueryClientProvider>
   </StrictMode>
 );

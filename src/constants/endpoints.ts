@@ -6,7 +6,7 @@ export const baseURL = env[0];
 export const endpoints = {
   authLogin: "auth/login",
   authLogout: "auth/logout",
-  adminAuthLogin: "admin/auth/login",
+  adminAuthLogin: "/auth/login",
   authRefreshToken: "Auth/refresh-token",
   admin: "admin",
   adminCreate: "admin/create",

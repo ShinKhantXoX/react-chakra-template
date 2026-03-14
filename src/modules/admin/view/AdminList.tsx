@@ -18,7 +18,7 @@ import {
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { GoSortAsc } from "react-icons/go";
 import { columns } from "../admin.payload";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppDispatch, AppRootState } from "@/stores";
 import { useDispatch, useSelector } from "react-redux";
 import { setPaginate } from "../admin.slice";
@@ -33,9 +33,11 @@ const AdminList = () => {
   const { data, pagingParams } = useSelector(
     (state: AppRootState) => state.admin
   );
-  const [loading, setLoading] = useState(false);
-  const { index, update, show } = useAdminService();
   const adminService = useAdminService();
+  const { useAdminIndex } = adminService;
+  
+  const { isLoading, isFetching } = useAdminIndex(pagingParams);
+  const loading = isLoading || isFetching;
 
   const [searchValue, setSearchValue] = useState(pagingParams.search || "");
   const timerRef = useRef<number | null>(null);
@@ -103,16 +105,6 @@ const AdminList = () => {
     // setRowsPerPage(+event.target.value);
     // setPage(0);
   };
-
-  const loadingData = useCallback(async () => {
-    setLoading(true);
-    await index(pagingParams);
-    setLoading(false);
-  }, [dispatch, pagingParams]);
-
-  useEffect(() => {
-    loadingData();
-  }, [pagingParams, loadingData]);
 
   return (
     <Container>
