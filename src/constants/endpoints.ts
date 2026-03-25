@@ -10,6 +10,8 @@ export const endpoints = {
   authRefreshToken: "Auth/refresh-token",
   admin: "admin",
   adminCreate: "admin/create",
+  /** Dashboard resource: GET/POST same path */
+  user: "users",
   customer: "Customer",
   promotion: "Promotion",
   review: "Review",

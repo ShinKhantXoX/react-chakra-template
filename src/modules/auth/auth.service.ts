@@ -1,7 +1,6 @@
 import { useDispatch } from "react-redux";
 import { postRequest } from "../../helpers/api";
 import { endpoints } from "../../constants/endpoints";
-import { httpServiceHandler } from "../../helpers/handler";
 import { getData, removeAllData, setData } from "../../helpers/localStorage";
 import { keys } from "../../constants/config";
 import { checkRefreshToken } from "../../shares/shareSlice";
@@ -17,11 +16,9 @@ export const useAuthService = () => {
       const response: any = await postRequest(
         endpoints.adminAuthLogin,
         payload,
-        dispatch
+        dispatch,
       );
-      await httpServiceHandler(dispatch, response);
       console.log("response ", response);
-      
 
       if (response.status === 200 && response.statusText === "OK") {
         setData(keys.API_TOKEN, response?.data?.accessToken);
@@ -46,14 +43,14 @@ export const useAuthService = () => {
           {
             accessToken: currentAccessToken,
             refreshToken: currentRefreshToken,
-          }
+          },
         );
         return response.data; // { accessToken, refreshToken }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           console.error(
             "Error refreshing token:",
-            error.response?.data || error.message
+            error.response?.data || error.message,
           );
         } else {
           console.error("An unexpected error occurred:", error);
@@ -92,7 +89,7 @@ export const useAuthService = () => {
             "Content-Type": "application/json",
             Accept: "*/*",
           },
-        }
+        },
       );
       if (response.status === 200) {
         setData(keys.API_TOKEN, response.data.accessToken);

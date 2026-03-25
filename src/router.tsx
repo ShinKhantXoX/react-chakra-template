@@ -5,13 +5,14 @@ import Login from "./modules/auth/view/Login";
 import BlankTemplate from "./layouts/pages/BlankTemplate";
 import { DashboardRoute } from "./modules/dashboard/dashboard.route";
 import { AdminRoute } from "./modules/admin/admin.route";
+import { UserRoute } from "./modules/user/user.route";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <DefaultLayout />,
     errorElement: <NotFound />,
-    children: [...DashboardRoute, ...AdminRoute],
+    children: [...DashboardRoute, ...AdminRoute, ...UserRoute],
   },
   {
     path: "auth",
