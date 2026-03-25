@@ -9,6 +9,11 @@ export const paths = {
   adminCreate: "/admin/new",
   adminDetail: "/admin/:id",
 
+  user: "/user",
+  userList: "/user/list",
+  userCreate: "/user/new",
+  userDetail: "/user/:id",
+
   city: "/city",
   cityList: "/city/list",
   cityCreate: "/city/new",

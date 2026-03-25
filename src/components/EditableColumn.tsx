@@ -10,7 +10,7 @@ const EditableColumn = ({
 }: {
   column: string;
   value: string;
-  id: number;
+  id: string | number;
   service: any;
 }) => {
   const [inputValue, setInputValue] = useState(value);

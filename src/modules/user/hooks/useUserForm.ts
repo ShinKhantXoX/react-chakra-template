@@ -1,17 +1,17 @@
 import { useActionState } from "react";
-import { useAdminService } from "./useAdminService";
+import { useUserService } from "./useUserService";
 import { z } from "zod";
-import { adminSchema } from "@/modules/admin/admin.payload";
+import { userSchema } from "@/modules/user/user.payload";
 import { formBuilder } from "@/helpers/formBuilder";
 
-export type FormErrors = {
+export type UserFormErrors = {
   [key: string]: string[] | undefined;
 } | null;
 
-export interface FormState {
+export interface UserFormState {
   success: boolean;
   message: string;
-  errors: FormErrors;
+  errors: UserFormErrors;
   formData?: {
     first_name: string;
     last_name: string;
@@ -25,14 +25,13 @@ export interface FormState {
   };
 }
 
-export function createAdminAction(
-  adminService: ReturnType<typeof useAdminService>,
+export function createUserAction(
+  userService: ReturnType<typeof useUserService>,
 ) {
   return async (
-    prevState: FormState,
+    _prevState: UserFormState,
     formData: FormData,
-  ): Promise<FormState> => {
-    // Extract form data and preserve it
+  ): Promise<UserFormState> => {
     const extractedData = {
       profile: formData.get("profile") as File,
       first_name: formData.get("first_name") as string,
@@ -46,7 +45,6 @@ export function createAdminAction(
       status: formData.get("status") as string,
     };
 
-    // Prepare data for validation
     const rawData = {
       profile: extractedData.profile,
       first_name: extractedData.first_name,
@@ -61,33 +59,22 @@ export function createAdminAction(
     };
 
     try {
-      console.log("Validating data:", rawData);
-
-      const validatedData = adminSchema.parse(rawData);
-      console.log("Validated data:", validatedData);
+      const validatedData = userSchema.parse(rawData);
       const payload = {
         ...validatedData,
-        dob: validatedData.dob.toISOString().split("T")[0], // convert just before API call
+        dob: validatedData.dob.toISOString().split("T")[0],
       };
-      console.log("Payload", payload);
-      const apiFormData = formBuilder(payload, adminSchema);
-
-      // Use the hook-based service
-      console.log("Calling adminService.store...");
-      const res = await adminService.store(apiFormData);
-      console.log("Service response:", res);
+      const apiFormData = formBuilder(payload, userSchema);
+      await userService.store(apiFormData);
 
       return {
         success: true,
-        message: "Admin created successfully!",
+        message: "User created successfully!",
         errors: null,
         formData: undefined,
       };
     } catch (error) {
-      console.error("Error in createAdmin:", error);
-
       if (error instanceof z.ZodError) {
-        console.log("Zod validation error:", error.errors);
         const fieldErrors = error.flatten().fieldErrors;
         return {
           success: false,
@@ -98,7 +85,6 @@ export function createAdminAction(
       }
 
       if (error instanceof Error) {
-        console.error("Error message:", error.message);
         return {
           success: false,
           message: error.message,
@@ -117,10 +103,10 @@ export function createAdminAction(
   };
 }
 
-export const useAdminForm = () => {
-  const adminService = useAdminService();
+export const useUserForm = () => {
+  const userService = useUserService();
   const [state, formAction, pending] = useActionState(
-    createAdminAction(adminService),
+    createUserAction(userService),
     {
       success: false,
       message: "",
@@ -130,7 +116,7 @@ export const useAdminForm = () => {
   );
 
   const getFieldValue = (
-    fieldName: keyof NonNullable<FormState["formData"]>,
+    fieldName: keyof NonNullable<UserFormState["formData"]>,
   ) => {
     return state.formData?.[fieldName] || "";
   };

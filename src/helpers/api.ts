@@ -1,7 +1,11 @@
 import { Dispatch } from "redux";
 import http from "../constants/axios";
 import { HTTPErrorResponse, HTTPResponse } from "../constants/config";
-import { httpErrorHandler, httpResponseHandler } from "./handler";
+import {
+  applyHttpServiceHandler,
+  httpErrorHandler,
+  httpResponseHandler,
+} from "./handler";
 
 const urlParams = (params: { [key: string]: any }) => {
   let paramsArray: Array<string> = [];
@@ -22,14 +26,18 @@ const urlParams = (params: { [key: string]: any }) => {
 export const getRequest = async (
   path: string,
   params: any | null,
-  dispatch: Dispatch
+  dispatch: Dispatch,
 ): Promise<HTTPResponse | HTTPErrorResponse | undefined> => {
   try {
     const url = params ? `${path}?${urlParams(params)}` : path;
     const result = await http.get(url);
-    return httpResponseHandler(result);
+    const response = httpResponseHandler(result);
+    await applyHttpServiceHandler(dispatch, response);
+    return response;
   } catch (error) {
-    return httpErrorHandler(error, dispatch);
+    const err = await httpErrorHandler(error, dispatch);
+    await applyHttpServiceHandler(dispatch, err);
+    return err;
   }
 };
 
@@ -42,14 +50,17 @@ export const getRequest = async (
 export const postRequest = async (
   path: string,
   payload: any,
-  dispatch: Dispatch
+  dispatch: Dispatch,
 ) => {
   try {
     const result = await http.post(path, payload);
-
-    return httpResponseHandler(result);
+    const response = httpResponseHandler(result);
+    await applyHttpServiceHandler(dispatch, response);
+    return response;
   } catch (error) {
-    return httpErrorHandler(error, dispatch);
+    const err = await httpErrorHandler(error, dispatch);
+    await applyHttpServiceHandler(dispatch, err);
+    return err;
   }
 };
 
@@ -62,13 +73,17 @@ export const postRequest = async (
 export const putRequest = async (
   path: string,
   payload: any,
-  dispatch: Dispatch
+  dispatch: Dispatch,
 ) => {
   try {
     const result = await http.put(path, payload);
-    return httpResponseHandler(result);
+    const response = httpResponseHandler(result);
+    await applyHttpServiceHandler(dispatch, response);
+    return response;
   } catch (error) {
-    return httpErrorHandler(error, dispatch);
+    const err = await httpErrorHandler(error, dispatch);
+    await applyHttpServiceHandler(dispatch, err);
+    return err;
   }
 };
 
@@ -80,8 +95,12 @@ export const putRequest = async (
 export const delRequest = async (path: string, dispatch: Dispatch) => {
   try {
     const result = await http.delete(path);
-    return httpResponseHandler(result);
+    const response = httpResponseHandler(result);
+    await applyHttpServiceHandler(dispatch, response);
+    return response;
   } catch (error) {
-    return httpErrorHandler(error, dispatch);
+    const err = await httpErrorHandler(error, dispatch);
+    await applyHttpServiceHandler(dispatch, err);
+    return err;
   }
 };

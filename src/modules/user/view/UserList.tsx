@@ -1,6 +1,7 @@
 "use client";
 import { Breadcrumb } from "@/components/BreadCrumb";
 import {
+  Button,
   ButtonGroup,
   Heading,
   IconButton,
@@ -15,26 +16,30 @@ import {
   Input,
   NativeSelect,
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
+import { paths } from "@/constants/paths";
+import { PermissionGate } from "@/ability/PermissionGate";
+import { Permission } from "@/ability/permissions";
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { GoSortAsc } from "react-icons/go";
-import { columns } from "../admin.payload";
+import { columns } from "../user.payload";
 import { useEffect, useRef, useState } from "react";
 import { AppDispatch, AppRootState } from "@/stores";
 import { useDispatch, useSelector } from "react-redux";
-import { setPaginate } from "../admin.slice";
+import { setPaginate } from "../user.slice";
 import { CiSearch } from "react-icons/ci";
 import { paginateOptions } from "@/constants/config";
 import { MdOutlineEditNote, MdOutlineDelete } from "react-icons/md";
 import EditableColumn from "@/components/EditableColumn";
-import { useAdminIndexQuery, useAdminService } from "../hooks/useAdminService";
+import { useUserIndexQuery, useUserService } from "../hooks/useUserService";
 
-const AdminList = () => {
+const UserList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { data, pagingParams } = useSelector(
-    (state: AppRootState) => state.admin,
+    (state: AppRootState) => state.user,
   );
-  const adminService = useAdminService();
-  const { isLoading, isFetching } = useAdminIndexQuery(pagingParams);
+  const userService = useUserService();
+  const { isLoading, isFetching } = useUserIndexQuery(pagingParams);
   const loading = isLoading || isFetching;
 
   const [searchValue, setSearchValue] = useState(pagingParams.search || "");
@@ -96,12 +101,9 @@ const AdminList = () => {
     dispatch(
       setPaginate({
         ...pagingParams,
-        // page: 1,
         rows: rowsPerPage,
       }),
     );
-    // setRowsPerPage(+event.target.value);
-    // setPage(0);
   };
 
   return (
@@ -114,7 +116,14 @@ const AdminList = () => {
           justifyContent="space-between"
           alignItems={"center"}
         >
-          <Heading size="xl">Admin Lists</Heading>
+          <Box display="flex" alignItems="center" gap="3">
+            <Heading size="xl">User Lists</Heading>
+            <PermissionGate permission={Permission.USER_STORE}>
+              <Button size="sm" variant="outline" asChild>
+                <RouterLink to={paths.userCreate}>Create user</RouterLink>
+              </Button>
+            </PermissionGate>
+          </Box>
           <Box>
             <InputGroup
               endAddon={
@@ -154,7 +163,6 @@ const AdminList = () => {
                       {column.sortable && (
                         <Icon
                           onClick={() => {
-                            console.log("sort click");
                             dispatch(
                               setPaginate({
                                 ...pagingParams,
@@ -182,22 +190,26 @@ const AdminList = () => {
                 <Table.Row key={`row-${item.id}-${index}`}>
                   <Table.Cell>
                     <EditableColumn
-                      column={"First Name"}
-                      value={item.first_name}
+                      column="username"
+                      value={item.username}
                       id={item.id}
-                      service={adminService}
+                      service={userService}
                     />
                   </Table.Cell>
                   <Table.Cell>
                     <EditableColumn
-                      column={"Last Name"}
-                      value={item.last_name}
+                      column="email"
+                      value={item.email ?? ""}
                       id={item.id}
-                      service={adminService}
+                      service={userService}
                     />
                   </Table.Cell>
-                  <Table.Cell>{item.dob}</Table.Cell>
-                  <Table.Cell>{item.email}</Table.Cell>
+                  <Table.Cell>{item.phone ?? "—"}</Table.Cell>
+                  <Table.Cell>
+                    {item.created_at
+                      ? String(item.created_at).slice(0, 10)
+                      : "—"}
+                  </Table.Cell>
                   <Table.Cell>
                     <Status.Root colorPalette="green">
                       <Status.Indicator />
@@ -243,9 +255,9 @@ const AdminList = () => {
           </NativeSelect.Root>
 
           <Pagination.Root
-            count={data.data.total}
-            pageSize={data.data.per_page}
-            page={data.data.current_page}
+            count={Math.max(data.data.total, 0)}
+            pageSize={Math.max(data.data.per_page, 1)}
+            page={Math.max(data.data.current_page, 1)}
           >
             <ButtonGroup variant="ghost" size="sm" wrap="wrap">
               <Pagination.PrevTrigger asChild>
@@ -259,7 +271,7 @@ const AdminList = () => {
               <Pagination.Items
                 render={(page) => (
                   <IconButton
-                    key={`page-${page.value}`} // Add unique key
+                    key={`page-${page.value}`}
                     variant={{ base: "ghost", _selected: "outline" }}
                     onClick={() => handleChangePage(page.value)}
                   >
@@ -283,4 +295,4 @@ const AdminList = () => {
   );
 };
 
-export default AdminList;
+export default UserList;

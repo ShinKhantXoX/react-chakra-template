@@ -12,11 +12,11 @@ export const adminSchema = z.object({
     .instanceof(File)
     .refine(
       (file) => file.size <= 5 * 1024 * 1024,
-      "File size must be less than 5MB"
+      "File size must be less than 5MB",
     )
     .refine(
       (file) => ["image/jpeg", "image/png", "image/jpg"].includes(file.type),
-      "Only JPEG and PNG files are allowed"
+      "Only JPEG and PNG files are allowed",
     )
     .optional()
     .nullable(),
@@ -37,7 +37,7 @@ export const adminSchema = z.object({
     }), // Special character
   dob: z.preprocess(
     (val) => (typeof val === "string" ? new Date(val) : val),
-    z.date({ required_error: "Date of Birth is required" })
+    z.date({ required_error: "Date of Birth is required" }),
   ),
   about: z.string().optional(),
   user_type: z.string(),
@@ -196,5 +196,7 @@ export const adminQueryKeys = {
   show: "admin-show",
   store: "admin-store",
   update: "admin-update",
-  delete: "admin-delete"
+  delete: "admin-delete",
+  /** Status dropdown options: pair with `"user" | "user_type"` in query key */
+  status: "admin-status",
 };

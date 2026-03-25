@@ -8,11 +8,13 @@ import { toaster } from "@/components/ui/toaster";
 import { loginSchema } from "../login.shema";
 import { useAuthService } from "../auth.service";
 import { ValidationMessage } from "@/helpers/ValidationMessage";
+import { useSetAbilityFromUser } from "@/ability/AppAbilityProvider";
 
 const Login = () => {
   const [isPending, startTransition] = useTransition();
   const navigate = useNavigate();
   const { store } = useAuthService();
+  const setAbilityFromUser = useSetAbilityFromUser();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<
@@ -60,6 +62,10 @@ const Login = () => {
         type: "success",
         duration: 3000,
       });
+
+      if (loginResult?.data?.user) {
+        setAbilityFromUser(loginResult.data.user);
+      }
 
       navigate("/dashboard");
     });

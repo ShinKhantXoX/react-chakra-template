@@ -1,7 +1,37 @@
 import { HTTPErrorResponse, HTTPResponse, keys } from "../constants/config";
+import { toaster } from "@/components/ui/toaster";
 import { checkRefreshToken, updateError } from "../shares/shareSlice";
 import { removeData } from "./localStorage";
 import { Dispatch } from "redux";
+
+/** Success envelope from axios + httpResponseHandler */
+export function isHttpResponse(r: unknown): r is HTTPResponse {
+  return (
+    typeof r === "object" &&
+    r !== null &&
+    "statusText" in r &&
+    "data" in r &&
+    typeof (r as HTTPResponse).status === "number"
+  );
+}
+
+/**
+ * Runs httpServiceHandler with the correct slice of the request result.
+ * Call from get/post/put/del helpers so errors (full HTTPErrorResponse) reach the handler with message/notification.
+ */
+export async function applyHttpServiceHandler(
+  dispatch: Dispatch,
+  response: HTTPResponse | HTTPErrorResponse | undefined,
+): Promise<void> {
+  if (response === undefined) {
+    return;
+  }
+  if (isHttpResponse(response)) {
+    await httpServiceHandler(dispatch, response.data);
+  } else {
+    await httpServiceHandler(dispatch, response);
+  }
+}
 
 /**
  * Payload handler for update state
@@ -14,7 +44,7 @@ export const payloadHandler = (
   payload: any,
   value: string | number,
   field: string,
-  fn: (updatedPayload: any) => void
+  fn: (updatedPayload: any) => void,
 ) => {
   let updatePayload = { ...payload };
   updatePayload[field] = value;
@@ -81,7 +111,7 @@ export const httpErrorHandler1 = (error: any) => {
  */
 export const httpErrorHandler = async (
   error: any,
-  dispatch: Dispatch
+  dispatch: Dispatch,
 ): Promise<HTTPErrorResponse> => {
   if (error.code === "ERR_NETWORK") {
     return {
@@ -158,38 +188,83 @@ export const httpResponseHandler = (result: any) => {
   return response;
 };
 
+export type HttpServiceHandlerPayload = {
+  status: number;
+  error?: unknown;
+  message?: string;
+  notification?: HTTPErrorResponse["notification"];
+};
+
+function defaultToastDescription(status: number): string {
+  switch (status) {
+    case 0:
+      return "Network error. Check your connection.";
+    case 404:
+      return "Resource not found.";
+    case 403:
+      return "You do not have permission for this action.";
+    case 405:
+      return "Method not allowed.";
+    default:
+      return "Request failed. Please try again.";
+  }
+}
+
+function toastTypeForStatus(
+  status: number,
+  variant?: string,
+): "error" | "warning" | "info" {
+  if (variant === "warning") return "warning";
+  if (variant === "error") return "error";
+  if (status >= 500 || status === 0) return "error";
+  return "warning";
+}
+
 /**
- * Http status handler from service
- * @param {*} dispatch
- * @param {*} result
- * @returns
+ * Http status handler from service (and central API helpers).
  */
 export const httpServiceHandler = async (
   dispatch: Dispatch,
-  result: { status: number; error?: string }
-  // noti?: any
+  result: HttpServiceHandlerPayload | unknown,
 ) => {
-  // console.log("result:", result);
+  if (result === null || result === undefined || typeof result !== "object") {
+    return;
+  }
+
+  const r = result as HttpServiceHandlerPayload;
+  if (typeof r.status !== "number") {
+    await dispatch(updateError(null));
+    return;
+  }
+
   await dispatch(updateError(null));
   if (
-    result.status === 400 ||
-    result.status === 0 ||
-    result.status === 500 ||
-    result.status === 404 ||
-    result.status === 403 ||
-    result.status === 405
+    r.status === 400 ||
+    r.status === 0 ||
+    r.status === 500 ||
+    r.status === 404 ||
+    r.status === 403 ||
+    r.status === 405
   ) {
-    // noti?.show(result.notification?.msg, {
-    //   severity: "error",
-    //   autoHideDuration: 3000,
-    // });
+    const description =
+      (typeof r.message === "string" && r.message) ||
+      r.notification?.msg ||
+      defaultToastDescription(r.status);
+    const toastType = toastTypeForStatus(r.status, r.notification?.variant);
+    const title = toastType === "warning" ? "Warning" : "Error";
+    toaster.create({
+      title,
+      description,
+      type: toastType,
+      duration: 3000,
+    });
   }
 
-  if (result.status === 422) {
-    await dispatch(updateError(result.error));
+  if (r.status === 422) {
+    await dispatch(updateError(r.error));
   }
 
-  if (result.status === 204) {
+  if (r.status === 204) {
     return null;
   }
 

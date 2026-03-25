@@ -13,13 +13,25 @@ import {
 import { CiMenuBurger } from "react-icons/ci";
 import { navigationlists } from "../defaultPaths";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Logout from "@/components/Logout";
 import Account from "@/components/Account";
+import { useAppAbility } from "@/ability/AppAbilityProvider";
 
 const BrandLayout = () => {
   const navigate = useNavigate();
+  const ability = useAppAbility();
   const [isOpen, setIsOpen] = useState(false);
+
+  const visibleNav = useMemo(
+    () =>
+      navigationlists.filter(
+        (item) =>
+          !item.requiredPermission ||
+          ability.can("execute", item.requiredPermission),
+      ),
+    [ability],
+  );
 
   const handleNavigation = (segment: string) => {
     navigate(segment);
@@ -50,7 +62,7 @@ const BrandLayout = () => {
                     </Drawer.Header>
                     <Drawer.Body p={"0"}>
                       <Stack>
-                        <For each={navigationlists}>
+                        <For each={visibleNav}>
                           {(item, index) => (
                             <Box
                               key={index}
